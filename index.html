@@ -1,0 +1,342 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
+<title>エレベーター開閉係 - HOLD THE DOOR?</title>
+<meta name="description" content="走ってくるその人、乗せる？乗せない？部長は乗せろ、汗だくと大声電話は閉め出せ。待ちすぎると車内がイライラ。60秒で空気読み力と称号が出る、ブラウザで遊べる3Dバカゲー。">
+<meta name="theme-color" content="#1b1f3b">
+<meta property="og:type" content="website">
+<meta property="og:title" content="エレベーター開閉係 - HOLD THE DOOR?">
+<meta property="og:description" content="走ってくるその人、乗せる？乗せない？部長を閉め出したら来月の席はない。60秒の空気読みゲーム。">
+<meta property="og:image" content="https://tom3games.github.io/elevator-keeper/og.png?v=1">
+<meta property="og:url" content="https://tom3games.github.io/elevator-keeper/">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect x='6' y='4' width='52' height='56' rx='6' fill='%231b1f3b'/%3E%3Crect x='12' y='12' width='19' height='44' fill='%23c9ced8'/%3E%3Crect x='33' y='12' width='19' height='44' fill='%23c9ced8'/%3E%3Cpath d='M28 30l-8 6 8 6zM36 30l8 6-8 6z' fill='%23e5383b'/%3E%3C/svg%3E">
+<style>
+[hidden]{display:none!important}
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --navy:#1b1f3b;--navy2:#2a3060;--cream:#fff8e8;--ink:#1d1a24;--brass:#e8b84a;--brass-dk:#9c7420;
+  --red:#e5383b;--red-dk:#8f1a1c;--green:#2fb36a;--green-dk:#14683a;--steel:#c9ced8;
+  --font:'Hiragino Sans','Hiragino Kaku Gothic ProN','Noto Sans JP','Yu Gothic',Meiryo,sans-serif;
+}
+html{background:var(--navy);touch-action:manipulation;-webkit-text-size-adjust:100%;text-size-adjust:100%}
+html,body{height:100%;color:var(--cream);font-family:var(--font);-webkit-tap-highlight-color:transparent;word-break:auto-phrase;line-break:strict;overflow-wrap:anywhere}
+body{overflow:hidden;background:var(--navy);-webkit-user-select:none;user-select:none;-webkit-touch-callout:none}
+button,canvas{touch-action:manipulation}
+button{font-family:inherit;color:inherit;font-size:inherit}
+:focus-visible{outline:3px solid var(--brass);outline-offset:3px}
+#gl{position:fixed;inset:0;width:100%;height:100%;display:block;z-index:0}
+.view{position:fixed;inset:0;height:100svh;overflow:hidden;z-index:2;display:flex;flex-direction:column;align-items:center;
+  padding:max(58px,calc(env(safe-area-inset-top) + 52px)) 16px max(18px,calc(env(safe-area-inset-bottom) + 14px));gap:12px}
+.wrap{width:min(520px,100%);display:flex;flex-direction:column;align-items:center;gap:clamp(8px,1.6vh,14px);min-height:0;max-height:100%}
+.view:not([hidden]) .wrap{animation:enter .35s cubic-bezier(.2,.8,.2,1) both}
+@keyframes enter{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+
+/* ボタン */
+.btn{position:relative;overflow:hidden;display:flex;align-items:center;justify-content:center;gap:10px;font-weight:900;font-size:18px;letter-spacing:.04em;border:0;border-radius:16px;min-height:54px;padding:0 20px;cursor:pointer;width:100%;
+  background:var(--cream);color:var(--ink);box-shadow:0 5px 0 #b9ab8e,0 10px 18px rgba(0,0,0,.3);transition:transform .07s,box-shadow .07s,filter .15s}
+.btn::before{content:"";position:absolute;left:8px;right:8px;top:4px;height:42%;border-radius:12px 12px 40% 40%/12px 12px 14px 14px;background:linear-gradient(rgba(255,255,255,.45),rgba(255,255,255,0));pointer-events:none}
+.btn:active{transform:translateY(4px);box-shadow:0 1px 0 #b9ab8e,0 3px 8px rgba(0,0,0,.3)}
+@media (hover:hover){.btn:hover{filter:brightness(1.07)}}
+.btn svg{width:24px;height:24px;flex:none;stroke:currentColor;fill:none;stroke-width:2.4;stroke-linecap:round;stroke-linejoin:round}
+.btn.red{background:linear-gradient(#ff5a5d,var(--red));color:#fff;box-shadow:0 6px 0 var(--red-dk),0 12px 22px rgba(229,56,59,.35);font-size:21px;min-height:62px}
+.btn.red:active{box-shadow:0 1px 0 var(--red-dk)}
+.btn.brass{background:linear-gradient(#ffd877,var(--brass));color:var(--ink);box-shadow:0 6px 0 var(--brass-dk),0 12px 22px rgba(232,184,74,.25)}
+.btn.brass:active{box-shadow:0 1px 0 var(--brass-dk)}
+.btn.ghost{background:rgba(27,31,59,.6);color:var(--cream);box-shadow:inset 0 0 0 2px rgba(255,248,232,.4);font-size:16px;min-height:48px;-webkit-backdrop-filter:blur(4px);backdrop-filter:blur(4px)}
+.btn.ghost::before{display:none}
+.btn.ghost:active{transform:translateY(2px)}
+.row{display:flex;gap:10px;width:100%}
+.row>.btn{flex:1}
+
+#corner{position:fixed;top:max(10px,env(safe-area-inset-top));right:max(10px,env(safe-area-inset-right));z-index:50;display:flex;gap:8px}
+#corner button{height:40px;min-width:44px;padding:0 12px;border-radius:12px;border:0;background:rgba(27,31,59,.72);box-shadow:inset 0 0 0 2px rgba(255,248,232,.3);font-weight:900;font-size:14px;cursor:pointer;display:flex;align-items:center;gap:6px}
+#corner svg{width:20px;height:20px;stroke:currentColor;fill:none;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round}
+
+/* ---------- タイトル */
+#vTitle{justify-content:space-between;background:linear-gradient(rgba(27,31,59,.55),rgba(27,31,59,0) 30%,rgba(27,31,59,0) 52%,rgba(27,31,59,.88) 78%)}
+#vTitle .wrap{height:100%;justify-content:space-between}
+.logo{text-align:center;line-height:1;margin-top:clamp(0px,2vh,20px)}
+.logo .l1{display:block;font-weight:900;font-size:clamp(26px,min(9vw,5.4vh),52px);letter-spacing:.06em;color:#fff;text-shadow:0 3px 0 var(--navy),0 0 16px rgba(0,0,0,.6)}
+.logo .l2{display:inline-block;margin-top:6px;font-weight:900;font-size:clamp(46px,min(17vw,10vh),104px);letter-spacing:.04em;color:var(--brass);
+  -webkit-text-stroke:2px var(--navy);text-shadow:0 6px 0 var(--red),0 10px 0 var(--navy),0 0 30px rgba(232,184,74,.5);transform:rotate(-3deg)}
+.logo .sub{display:inline-block;margin-top:16px;font-weight:900;font-size:clamp(12px,3.4vw,16px);letter-spacing:.2em;padding:5px 14px;border-radius:99px;background:var(--red);color:#fff;box-shadow:0 3px 0 var(--red-dk)}
+.tBottom{width:100%;display:flex;flex-direction:column;gap:10px}
+.catch{font-weight:900;font-size:clamp(16px,4.6vw,22px);text-align:center;text-shadow:0 2px 8px #000}
+.mcLine{display:flex;gap:10px;align-items:flex-start;width:100%}
+.mcFace{flex:none;width:52px;height:52px}
+.bubble{position:relative;flex:1;background:var(--cream);color:var(--ink);border-radius:16px;padding:10px 13px;font-weight:700;font-size:14px;line-height:1.55;box-shadow:0 4px 0 #b9ab8e}
+.bubble small{display:block;font-size:11px;color:var(--red-dk);font-weight:900;margin-bottom:1px}
+.bubble::before{content:"";position:absolute;left:-8px;top:18px;border:8px solid transparent;border-right-color:var(--cream);border-left:0}
+
+@media (max-height:560px) and (min-aspect-ratio:1/1){
+  #vTitle{padding-top:max(10px,env(safe-area-inset-top));padding-bottom:max(10px,env(safe-area-inset-bottom))}
+  #vTitle .wrap{width:min(640px,100%)}
+  .logo{margin-top:0}.logo .l1{font-size:26px}.logo .l2{font-size:min(15vh,64px)}.logo .sub{margin-top:8px}
+  #vTitle .mcLine{display:none}
+  .tBottom{flex-direction:row;flex-wrap:wrap;gap:8px}
+  .catch{width:100%;font-size:17px}
+  .tBottom .btn{flex:1;min-height:52px}
+}
+/* ---------- 遊び方 */
+#vHow{background:rgba(20,22,44,.82);-webkit-backdrop-filter:blur(3px);backdrop-filter:blur(3px)}
+.howCard{width:100%;background:var(--cream);color:var(--ink);border-radius:20px;padding:16px 14px;box-shadow:0 8px 0 #b9ab8e,0 18px 30px rgba(0,0,0,.35);display:flex;flex-direction:column;gap:10px;min-height:0;overflow:hidden}
+.howCard h2{font-size:22px;font-weight:900;text-align:center;color:var(--navy)}
+.howCard p{font-size:14px;line-height:1.6;font-weight:700}
+.howCard p b{color:var(--red-dk)}
+.ctlRow{display:flex;gap:10px;align-items:center;background:#f1e7d0;border-radius:12px;padding:8px 10px}
+.ctlRow .mini{flex:none;display:flex;gap:6px}
+.ctlRow .mini span{width:38px;height:38px;border-radius:50%;background:radial-gradient(circle at 40% 35%,#fff,#c9ced8 60%,#8d93a3);display:grid;place-items:center;box-shadow:0 2px 0 #6b7080}
+.ctlRow .mini svg{width:24px;height:24px}
+.ctlRow p{font-size:13px}
+.types{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.tcol h3{font-size:13px;font-weight:900;color:#fff;border-radius:8px;padding:3px 8px;margin-bottom:6px;text-align:center}
+.tcol.g h3{background:var(--green)}.tcol.b h3{background:var(--red)}
+.tcol ul{list-style:none;display:flex;flex-direction:column;gap:4px}
+.tcol li{display:flex;align-items:center;gap:6px;font-size:12.5px;font-weight:800;line-height:1.25}
+.tcol li .ic{flex:none;width:30px;height:30px}
+.capNote{font-size:12px!important;color:#6b5a3a}
+@media (max-height:700px){.howCard{padding:12px;gap:7px}.howCard h2{font-size:18px}.howCard p{font-size:12.5px;line-height:1.45}.tcol li .ic{width:24px;height:24px}.tcol li{font-size:11.5px}.ctlRow{padding:5px 8px}}
+@media (max-height:560px) and (min-aspect-ratio:1/1){
+  #vHow{padding-top:max(10px,env(safe-area-inset-top))}
+  #vHow .wrap{width:min(860px,100%);flex-direction:row;align-items:stretch}
+  .ctlRow .mini{flex-direction:column}.ctlRow p{font-size:12px}.tcol h3{font-size:12px;white-space:nowrap}.tcol li{font-size:11px}.howCard{grid-template-columns:1.05fr 1fr!important}
+  .howCard{flex:1;display:grid;grid-template-columns:1fr 1fr;grid-template-rows:auto 1fr;column-gap:12px;padding:10px 12px;gap:6px}
+  .howCard h2{grid-column:1/3;font-size:16px}
+  .howL{display:flex;flex-direction:column;gap:6px}
+  #vHow .wrap>.row{flex-direction:column;width:136px;flex:none;justify-content:flex-end}
+  #vHow .wrap>.row>.btn{flex:none}
+}
+
+/* ---------- プレイ */
+#vPlay{padding:0;display:block;pointer-events:none}
+#vPlay button{pointer-events:auto}
+#hud{position:absolute;left:max(10px,env(safe-area-inset-left));right:max(124px,calc(env(safe-area-inset-right) + 118px));top:max(10px,env(safe-area-inset-top));display:flex;flex-wrap:wrap;gap:6px;align-items:center}
+.chip{display:flex;align-items:center;gap:6px;height:40px;padding:0 12px;border-radius:12px;background:rgba(27,31,59,.78);box-shadow:inset 0 0 0 2px rgba(255,248,232,.22);font-weight:900;font-size:13px;white-space:nowrap}
+.chip b{font-size:22px;color:var(--brass);font-variant-numeric:tabular-nums;min-width:1.4em;text-align:right}
+#chipTime.hurry b{color:#ff6b6e;animation:pulse .5s ease-in-out infinite alternate}
+@keyframes pulse{to{transform:scale(1.18)}}
+#capIcons{display:flex;gap:2px}
+#capIcons i{width:9px;height:18px;border-radius:5px 5px 2px 2px;background:rgba(255,248,232,.22)}
+#capIcons i.on{background:var(--cream)}
+#chipCap.full #capIcons i.on{background:#ff6b6e}
+#chipIrr{flex:1;min-width:150px;max-width:300px}
+@media (max-width:380px){#chipCap>span[data-t]{display:none}.chip{padding:0 9px}}
+#irrBar{flex:1;height:12px;border-radius:6px;background:rgba(255,255,255,.15);overflow:hidden}
+#irrBar i{display:block;height:100%;width:0;background:linear-gradient(90deg,#7ad37a,#f5c84c 50%,#ff4a4a);background-size:300px 100%;transition:width .15s}
+#irrFace{width:26px;height:26px;flex:none}
+#ctl{position:absolute;left:0;right:0;bottom:max(14px,calc(env(safe-area-inset-bottom) + 10px));display:flex;justify-content:center;gap:clamp(22px,8vw,60px)}
+.eb{width:clamp(96px,28vw,128px);height:clamp(96px,28vw,128px);border-radius:50%;border:0;cursor:pointer;position:relative;
+  background:radial-gradient(circle at 50% 50%,#f6f7fa 0 52%,#c9ced8 53% 60%,#8d93a3 61% 100%);box-shadow:0 6px 0 #4b4f5c,0 12px 22px rgba(0,0,0,.45),inset 0 2px 0 rgba(255,255,255,.7);
+  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:0;color:var(--navy);transition:transform .06s,box-shadow .06s}
+.eb:active,.eb.press{transform:translateY(4px);box-shadow:0 2px 0 #4b4f5c,0 4px 10px rgba(0,0,0,.45),inset 0 2px 0 rgba(255,255,255,.7)}
+.eb svg{width:46%;height:auto}
+.eb .k{font-weight:900;font-size:clamp(15px,4.4vw,20px);line-height:1;margin-top:2px}
+.eb .k small{font-size:.6em;margin-left:3px;opacity:.6}
+.eb.on{background:radial-gradient(circle at 50% 50%,#fff6c8 0 46%,#ffcd3a 52%,#c9ced8 53% 60%,#8d93a3 61% 100%);box-shadow:0 2px 0 #4b4f5c,0 0 0 4px rgba(255,205,58,.6),0 0 30px rgba(255,205,58,.8),inset 0 2px 0 rgba(255,255,255,.7);transform:translateY(4px)}
+#bOpen .key,#bClose .key{position:absolute;top:-22px;font-size:11px;font-weight:900;color:var(--cream);text-shadow:0 1px 3px #000;white-space:nowrap}
+body.touch .key{display:none}
+#bubbles{position:absolute;inset:0;overflow:hidden;pointer-events:none}
+.sb{position:absolute;left:0;top:0;transform-origin:50% 100%;background:#fff;color:var(--ink);font-weight:900;font-size:14px;line-height:1.25;padding:5px 9px;border-radius:12px;white-space:nowrap;box-shadow:0 3px 0 rgba(0,0,0,.25);border:2px solid var(--ink);max-width:70vw;overflow:hidden;text-overflow:ellipsis}
+.sb::after{content:"";position:absolute;left:50%;bottom:-9px;margin-left:-6px;border:7px solid transparent;border-top-color:var(--ink);border-bottom:0}
+.sb.think{border-style:dashed;border-radius:20px;background:#eef6ff}
+.sb.loud{background:#ffe14a;font-size:16px;border-radius:4px;transform:rotate(-3deg)}
+.sb.rider{background:#2b2b3b;color:#fff;border-color:#fff;font-size:13px}
+.sb.rider::after{border-top-color:#fff}
+.sb.angry{background:#ff4a4a;color:#fff;border-color:#fff}
+#caption{position:absolute;left:50%;top:36%;transform:translate(-50%,-50%) rotate(-4deg) scale(.6);opacity:0;font-weight:900;font-size:clamp(24px,8vw,48px);color:#fff;text-align:center;white-space:nowrap;
+  text-shadow:0 4px 0 var(--red-dk),0 0 18px rgba(0,0,0,.6);-webkit-text-stroke:1.5px var(--ink);transition:transform .25s cubic-bezier(.3,1.6,.5,1),opacity .2s;pointer-events:none}
+#caption.on{transform:translate(-50%,-50%) rotate(-4deg) scale(1);opacity:1}
+#caption.good{text-shadow:0 4px 0 var(--green-dk),0 0 18px rgba(0,0,0,.6)}
+#hint{position:absolute;left:50%;top:calc(max(10px,env(safe-area-inset-top)) + 96px);transform:translateX(-50%);display:flex;align-items:center;gap:8px;background:var(--cream);color:var(--ink);border-radius:99px;padding:5px 14px 5px 6px;font-weight:900;font-size:15px;white-space:nowrap;box-shadow:0 4px 0 #b9ab8e,0 8px 16px rgba(0,0,0,.35);animation:hintIn .3s cubic-bezier(.3,1.6,.5,1)}
+#hint .ic{width:34px;height:34px;flex:none}
+@keyframes hintIn{from{transform:translateX(-50%) scale(.5);opacity:0}}
+@media (max-height:560px) and (min-aspect-ratio:1/1){#hint{top:calc(max(8px,env(safe-area-inset-top)) + 46px)}}
+#count{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;background:rgba(20,22,44,.45);pointer-events:auto}
+#count .n{font-weight:900;font-size:min(30vw,26vh);line-height:1;color:var(--brass);text-shadow:0 8px 0 var(--red),0 0 30px rgba(0,0,0,.6);-webkit-text-stroke:3px var(--navy)}
+#count .m{font-weight:900;font-size:clamp(16px,5vw,24px);text-shadow:0 2px 8px #000}
+#flash{position:absolute;inset:0;background:#ff2a2a;opacity:0;pointer-events:none;transition:opacity .4s}
+@media (max-height:560px) and (min-aspect-ratio:1/1){
+  #ctl{left:max(14px,env(safe-area-inset-left));right:max(14px,env(safe-area-inset-right));justify-content:space-between;bottom:max(12px,env(safe-area-inset-bottom))}
+  .eb{width:clamp(82px,22vh,110px);height:clamp(82px,22vh,110px)}
+  .chip{height:34px}
+  .chip b{font-size:18px}
+}
+@media (min-width:900px) and (min-height:600px){.eb{width:120px;height:120px}}
+
+/* ---------- 結果 */
+#vResult{background:rgba(20,22,44,.78);-webkit-backdrop-filter:blur(3px);backdrop-filter:blur(3px);padding-top:max(56px,calc(env(safe-area-inset-top) + 50px))}
+#vResult .wrap{height:100%;justify-content:center}
+.rCard{position:relative;width:100%;background:var(--cream);color:var(--ink);border-radius:20px;padding:14px 14px 12px;box-shadow:0 8px 0 #b9ab8e,0 18px 30px rgba(0,0,0,.4);display:flex;flex-direction:column;gap:8px;min-height:0;overflow:hidden}
+.rHead{text-align:center;font-weight:900;font-size:13px;color:#fff;background:var(--navy);border-radius:8px;padding:4px;letter-spacing:.1em}
+.rTop{display:flex;align-items:center;gap:10px}
+.scoreBox{flex:1;text-align:center}
+.scoreBox .lab{font-weight:900;font-size:13px;color:#6b5a3a}
+.scoreBox .num{font-weight:900;font-size:clamp(52px,16vw,76px);line-height:1;color:var(--navy);font-variant-numeric:tabular-nums}
+.scoreBox .num small{font-size:.35em;margin-left:2px}
+.rank{flex:none;width:clamp(80px,24vw,104px);height:clamp(80px,24vw,104px);border-radius:50%;border:5px solid var(--red);color:var(--red);display:grid;place-items:center;font-weight:900;font-size:clamp(44px,13vw,60px);transform:rotate(-14deg) scale(2.4);opacity:0;transition:transform .28s cubic-bezier(.5,1.8,.6,1),opacity .15s;background:rgba(229,56,59,.06)}
+.rank.on{transform:rotate(-14deg) scale(1);opacity:.92}
+.titleBand{text-align:center;font-weight:900;font-size:clamp(20px,6vw,28px);color:#fff;background:linear-gradient(90deg,var(--red),#ff6a3d);border-radius:10px;padding:6px 8px;transform:scaleX(0);transition:transform .3s cubic-bezier(.2,1.4,.4,1);line-height:1.2}
+.titleBand.on{transform:scaleX(1)}
+.titleBand small{display:block;font-size:12px;opacity:.9;font-weight:800}
+.lists{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.lst{background:#f1e7d0;border-radius:12px;padding:6px 8px;min-width:0}
+.lst h4{font-size:12px;font-weight:900;margin-bottom:4px}
+.lst.g h4{color:var(--green-dk)}.lst.b h4{color:var(--red-dk)}
+.lst .items{display:flex;flex-wrap:wrap;gap:3px 6px;min-height:30px;align-items:center}
+.lst .it{display:flex;align-items:center;gap:1px;font-weight:900;font-size:13px}
+.lst .it svg{width:26px;height:26px}
+.lst .none{font-size:12px;color:#8a7a5a;font-weight:700}
+.bossLine{display:flex;align-items:center;gap:8px;background:#2b1a1a;color:#fff;border-radius:12px;padding:6px 10px}
+.bossLine svg{width:40px;height:40px;flex:none}
+.bossLine .t{flex:1;font-weight:900;font-size:14px}
+.bossLine .v{font-weight:900;font-size:34px;color:#ff6b6e;line-height:1}
+.bossLine .v small{font-size:14px;margin-left:2px;color:#fff}
+.bossLine.zero{background:#1d3b2a}.bossLine.zero .v{color:#7ad37a}
+.subStats{display:flex;justify-content:space-around;gap:6px;font-size:11.5px;font-weight:800;color:#5c4a2e;text-align:center}
+.subStats b{display:block;font-size:17px;color:var(--ink)}
+.rFoot{display:flex;flex-direction:column;gap:8px;width:100%}
+.rFoot .row .btn{white-space:nowrap;padding:0 10px;font-size:16px}
+.rev{opacity:0;transform:translateY(8px);transition:opacity .3s,transform .3s}
+.rev.on{opacity:1;transform:none}
+#toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);background:var(--ink);color:#fff;font-weight:900;padding:10px 18px;border-radius:99px;z-index:60;font-size:14px}
+@media (max-height:740px){.rCard{gap:6px;padding:10px 12px}.scoreBox .num{font-size:52px}.rank{width:76px;height:76px;font-size:42px}.titleBand{font-size:20px;padding:4px 8px}.bossLine{padding:4px 10px}.bossLine .v{font-size:26px}.bossLine svg{width:32px;height:32px}.lst .it svg{width:22px;height:22px}#vResult .mcLine{display:none}.rFoot .btn{min-height:46px;font-size:16px}.rFoot .btn.red{min-height:52px;font-size:18px}}
+@media (max-height:560px) and (min-aspect-ratio:1/1){
+  #vResult{padding-top:max(8px,env(safe-area-inset-top));padding-bottom:max(8px,env(safe-area-inset-bottom))}
+  #vResult .wrap{width:min(860px,100%);flex-direction:row;align-items:stretch}
+  .rCard{flex:1;display:grid;grid-template-columns:150px 1fr;grid-template-rows:auto auto auto 1fr;column-gap:10px;row-gap:5px;padding:8px 10px}
+  .rHead{grid-column:1/3}
+  .rTop{grid-column:1;grid-row:2/4;flex-direction:column;gap:2px}
+  .titleBand{grid-column:2;grid-row:2;font-size:18px}
+  .bossLine{grid-column:2;grid-row:3}
+  .lists{grid-column:1/3;grid-row:4}
+  .subStats{display:none}
+  .scoreBox .num{font-size:46px}
+  .rank{width:64px;height:64px;font-size:34px;border-width:4px}
+  .rFoot{width:160px;flex:none;justify-content:flex-end}
+  .bossLine .t{white-space:nowrap;font-size:12px}
+  .rFoot .row{flex-direction:column;gap:8px}
+  .rHead{padding:2px;font-size:12px}.bossLine{padding:2px 10px}.bossLine .v{font-size:24px}.bossLine svg{width:28px;height:28px}.lst{padding:4px 8px}.lst .items{min-height:0}.lst .it svg{width:20px;height:20px}.titleBand{padding:3px 8px}
+  .rFoot .btn{min-height:42px;font-size:14px;padding:0 8px}
+  .rFoot .btn.red{min-height:48px;font-size:16px}
+}
+</style>
+</head>
+<body>
+<canvas id="gl"></canvas>
+
+<div id="corner">
+  <button id="bLang" aria-label="language"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c3 3 3 15 0 18M12 3c-3 3-3 15 0 18"/></svg><span id="langLab">EN</span></button>
+  <button id="bMute" aria-label="sound"><svg id="icOn" viewBox="0 0 24 24"><path d="M4 9h4l5-4v14l-5-4H4z"/><path d="M16 9c1.5 1.5 1.5 4.5 0 6M18.5 6.5c3 3 3 8 0 11"/></svg><svg id="icOff" viewBox="0 0 24 24" hidden><path d="M4 9h4l5-4v14l-5-4H4z"/><path d="M17 9l5 6M22 9l-5 6"/></svg></button>
+</div>
+
+<main id="vTitle" class="view">
+  <div class="wrap">
+    <div class="logo"><span class="l1" data-t="title1"></span><span class="l2" data-t="title2"></span><br><span class="sub" data-t="sub"></span></div>
+    <div class="tBottom">
+      <div class="catch" data-t="catch"></div>
+      <div class="mcLine"><div class="mcFace" data-face="mc"></div><div class="bubble"><small data-t="mcName"></small><span data-t="mcTitle"></span></div></div>
+      <button class="btn red" id="bStart"><svg viewBox="0 0 24 24"><path d="M7 4l12 8-12 8z" fill="currentColor"/></svg><span data-t="start"></span></button>
+      <button class="btn ghost" id="bHow"><span data-t="how"></span></button>
+    </div>
+  </div>
+</main>
+
+<main id="vHow" class="view" hidden>
+  <div class="wrap">
+    <div class="howCard">
+      <h2 data-t="howTitle"></h2>
+      <div class="howL">
+        <p data-t="howRule"></p>
+        <div class="ctlRow"><div class="mini"><span data-face="icOpen"></span><span data-face="icClose"></span></div><p id="howCtl"></p></div>
+        <p class="capNote" data-t="capNote"></p>
+      </div>
+      <div class="types">
+        <div class="tcol g"><h3 data-t="good"></h3><ul id="listGood"></ul></div>
+        <div class="tcol b"><h3 data-t="bad"></h3><ul id="listBad"></ul></div>
+      </div>
+    </div>
+    <div class="row">
+      <button class="btn ghost" id="bHowBack"><span data-t="back"></span></button>
+      <button class="btn red" id="bHowGo"><span data-t="go"></span></button>
+    </div>
+  </div>
+</main>
+
+<section id="vPlay" class="view" hidden>
+  <div id="bubbles"></div>
+  <div id="flash"></div>
+  <div id="hud">
+    <div class="chip" id="chipTime"><span data-t="time"></span><b id="tLeft">60</b></div>
+    <div class="chip" id="chipCap"><span data-t="cap"></span><span id="capIcons"></span></div>
+    <div class="chip" id="chipIrr"><span id="irrFace"></span><span id="irrBar"><i></i></span></div>
+  </div>
+  <div id="caption"></div>
+  <div id="hint" hidden><span class="ic"></span><span class="tx"></span></div>
+  <div id="ctl">
+    <button class="eb" id="bOpen" aria-label="open"><span data-face="icOpen"></span><span class="k"><span data-t="open"></span><small data-t="openSub"></small></span><span class="key">← A</span></button>
+    <button class="eb" id="bClose" aria-label="close"><span data-face="icClose"></span><span class="k"><span data-t="close"></span><small data-t="closeSub"></small></span><span class="key">→ D Space</span></button>
+  </div>
+  <div id="count" hidden><div class="n" id="countN">3</div><div class="m" id="countM"></div></div>
+</section>
+
+<main id="vResult" class="view" hidden>
+  <div class="wrap">
+    <div class="rCard" id="rCard">
+      <div class="rHead" data-t="resHead"></div>
+      <div class="rTop">
+        <div class="scoreBox"><div class="lab" data-t="score"></div><div class="num"><span id="rScore">0</span><small>%</small></div></div>
+        <div class="rank" id="rRank">S</div>
+      </div>
+      <div class="titleBand" id="rTitle"></div>
+      <div class="bossLine rev" id="rBoss"><span data-face="boss"></span><span class="t" data-t="bossOut"></span><span class="v"><span id="rBossN">0</span><small data-t="times"></small></span></div>
+      <div class="lists rev" id="rLists">
+        <div class="lst g"><h4 data-t="inList"></h4><div class="items" id="rIn"></div></div>
+        <div class="lst b"><h4 data-t="outList"></h4><div class="items" id="rOut"></div></div>
+      </div>
+      <div class="subStats rev" id="rSub"></div>
+      <div class="mcLine rev" id="rMc"><div class="mcFace" data-face="mc"></div><div class="bubble"><small data-t="mcName"></small><span id="rComment"></span></div></div>
+    </div>
+    <div class="rFoot">
+      <button class="btn red" id="bAgain"><svg viewBox="0 0 24 24"><path d="M4 12a8 8 0 1 0 3-6.2M4 4v5h5"/></svg><span data-t="again"></span></button>
+      <div class="row">
+        <button class="btn brass" id="bSave"><svg viewBox="0 0 24 24"><path d="M12 4v11M7 10l5 5 5-5M5 20h14"/></svg><span data-t="save"></span></button>
+        <button class="btn ghost" id="bTitle"><span data-t="toTitle"></span></button>
+      </div>
+    </div>
+  </div>
+</main>
+<div id="toast" hidden></div>
+
+<script>
+// ブラウザの拡大を止める（ピンチ・ダブルタップ・トラックパッドのピンチ・Ctrl+ホイール/キー）。iOS は user-scalable=no を無視するので JS でも止める
+(function(){
+  var opt={passive:false};
+  ['gesturestart','gesturechange','gestureend'].forEach(function(n){document.addEventListener(n,function(e){e.preventDefault()},opt)});
+  document.addEventListener('touchmove',function(e){if(e.touches&&e.touches.length>1)e.preventDefault()},opt);
+  var last=0;document.addEventListener('touchend',function(e){var n=Date.now();if(n-last<300&&!(e.target.closest&&e.target.closest('button,a')))e.preventDefault();last=n},opt);
+  document.addEventListener('dblclick',function(e){e.preventDefault()},opt);
+  window.addEventListener('wheel',function(e){if(e.ctrlKey)e.preventDefault()},opt);
+  window.addEventListener('keydown',function(e){if((e.ctrlKey||e.metaKey)&&['+','-','=','0',';'].indexOf(e.key)>=0)e.preventDefault()});
+})();
+// 起動失敗の保険。8秒たって window.__ekReady が立っていなければ原因と UA を画面に出す
+(function(){
+  var errs=[];
+  window.addEventListener('error',function(e){errs.push((e.message||'error')+' @'+(e.filename||'')+':'+(e.lineno||''))});
+  window.addEventListener('unhandledrejection',function(e){errs.push('reject: '+(e.reason&&e.reason.message||e.reason))});
+  setTimeout(function(){
+    if(window.__ekReady) return;
+    var d=document.createElement('div');d.id='boot-err';
+    d.style.cssText='position:fixed;inset:auto 8px 8px 8px;z-index:99;background:#fff;color:#b00;font:12px/1.4 monospace;white-space:pre-wrap;padding:10px;border-radius:8px';
+    d.textContent='起動できませんでした / failed to start\n'+(errs.join('\n')||'(no error captured)')+'\n'+navigator.userAgent;
+    document.body.appendChild(d);
+  },8000);
+})();
+</script>
+<script src="data.js?v=1"></script>
+<script src="snd.js?v=1"></script>
+<script type="module" src="game.js?v=1"></script>
+</body>
+</html>
