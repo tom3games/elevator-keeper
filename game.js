@@ -909,6 +909,15 @@ async function makeCard(R) {
   x.textAlign = 'center'; x.fillStyle = '#e8b84a'; x.font = `800 26px ${F}`; x.fillText(T('url'), 540, 1335)
   return c
 }
+// Xでポスト（クリックの中で同期的に開く。URL は url パラメータで渡す）
+const GAME_URL = 'https://tom3games.github.io/elevator-keeper/'
+function xText() {
+  const R = S.result; if (!R) return ''
+  const rk = R.rank, sp = R.special ? T('xSp').replace('{x}', D.SPECIAL[S.lang][R.special]) : ''
+  return T('xText').replace('{s}', R.score).replace('{r}', rk[1]).replace('{t}', S.lang === 'ja' ? rk[2] : rk[3]).replace('{sp}', sp).replace('{b}', R.log.bossOut) + ' ' + T('share')
+}
+function xIntent() { return 'https://x.com/intent/post?text=' + encodeURIComponent(xText()) + '&url=' + encodeURIComponent(GAME_URL) }
+function postX() { if (!S.result) return; window.open(xIntent(), '_blank', 'noopener') }
 async function saveImage() {
   if (!S.result) return
   const c = await makeCard(S.result)
@@ -952,6 +961,7 @@ function boot() {
   on('#bHowGo', () => { Snd.sfx('tap'); store.set('how', '1'); startGame() })
   on('#bAgain', () => { Snd.sfx('tap'); startGame() })
   on('#bSave', () => saveImage())
+  on('#bX', () => { Snd.sfx('tap'); postX() })
   on('#bTitle', () => { Snd.sfx('tap'); startTitle() })
   on('#rCard', () => { if (fillResult.skip) fillResult.skip() })
   on('#bLang', () => { S.lang = S.lang === 'ja' ? 'en' : 'ja'; store.set('lang', S.lang); applyLang() })
@@ -979,7 +989,7 @@ function flashBtn(id) { const el = $(id); el.classList.add('press'); setTimeout(
 // ---------- 検証用の窓口
 window.ek = {
   S, D, Snd, TYPES, BOTS, THREE, CAM, setFace,
-  fillCar(n) { for (const r of S.riders) if (r.state === 'exitWait') r.state = 'ride'; let k = 0; while (carCount() < n && k++ < 10) { const P = makePerson('rider'); P.state = 'ride'; P.stay = 9; addRider(P, freeSlot()) } }, setOpen, pressClose, startGame, startTitle, finish, makeCard, saveImage, setBot, carCount, camera, scene, render,
+  fillCar(n) { for (const r of S.riders) if (r.state === 'exitWait') r.state = 'ride'; let k = 0; while (carCount() < n && k++ < 10) { const P = makePerson('rider'); P.state = 'ride'; P.stay = 9; addRider(P, freeSlot()) } }, setOpen, pressClose, startGame, startTitle, finish, makeCard, saveImage, xText, xIntent, postX, GAME_URL, setBot, carCount, camera, scene, render,
   get fps() { return fps },
   // 頭を使わずに n 回のゲームをボットで回して点の分布を出す（描画なし）
   sim(botName, seed) {

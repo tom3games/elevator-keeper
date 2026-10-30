@@ -32,6 +32,7 @@ window.EK_DATA = {
       url: 'tom3games.github.io/elevator-keeper',
       cardFoot: 'あなたの空気読み力は？',
       share: '#エレベーター開閉係',
+      post: 'Xでポスト', xText: 'エレベーター開閉係で空気読み力{s}%、{r}ランク「{t}」{sp}でした。部長を閉め出した回数{b}回。', xSp: '（{x}）',
     },
     en: {
       title1: 'HOLD THE', title2: 'DOOR?', sub: 'ELEVATOR KEEPER',
@@ -64,6 +65,7 @@ window.EK_DATA = {
       url: 'tom3games.github.io/elevator-keeper',
       cardFoot: 'How well do you read the room?',
       share: '#HoldTheDoorGame',
+      post: 'Post on X', xText: 'HOLD THE DOOR? Room-reading {s}%, rank {r}: "{t}"{sp}. Boss locked out {b}x.', xSp: ' ({x})',
     },
   },
   // 人の種類。good=乗せるべき。pt=[乗せた, 閉め出した] の点

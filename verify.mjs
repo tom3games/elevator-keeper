@@ -62,6 +62,16 @@ const glVar = p => p.evaluate(() => {
 })
 // プレイ画面へ（カウントを飛ばして時間を止める）
 const toPlay = (p, seed = 4242) => p.evaluate(seed => { ek.startGame(seed); ek.dbg.pause(true); ek.S.phase = 'play'; document.querySelector('#count').hidden = true }, seed)
+// Xでポスト: 押すと新しいタブで x.com/intent/post が開く（x.com は偽の応答で受ける）
+async function xPost(pg) {
+  await pg.context().route('https://x.com/**', r => r.fulfill({ status: 200, contentType: 'text/html', body: '<title>x</title>ok' }))
+  const b = await pg.evaluate(() => { const el = document.querySelector('#bX'), r = el.getBoundingClientRect(); return { vis: !!el.offsetParent && r.width > 60 && r.height >= 38, clip: el.scrollWidth > el.clientWidth + 1, label: el.innerText.trim() } })
+  const [pop] = await Promise.all([pg.waitForEvent('popup', { timeout: 6000 }), pg.click('#bX')])
+  await pop.waitForLoadState().catch(() => {}); const url = pop.url(); await pop.close()
+  const u = new URL(url), api = await pg.evaluate(() => ({ text: ek.xText(), url: ek.GAME_URL, score: ek.S.result.score, title: document.querySelector('#rTitle').firstChild.textContent, rank: document.querySelector('#rRank').textContent }))
+  return { b, url, text: u.searchParams.get('text'), link: u.searchParams.get('url'), api }
+}
+const clipped = q => q.evaluate(() => [...document.querySelectorAll('.view:not([hidden]) button')].filter(b => b.offsetParent && b.scrollWidth > b.clientWidth + 1).map(b => b.id))
 const SIZES = [[360, 640, 'small'], [390, 844, 'phone'], [844, 390, 'land'], [667, 375, 'land-se'], [768, 1024, 'tab'], [1440, 900, 'pc']]
 
 const browser = await chromium.launch(GPU)
@@ -238,6 +248,10 @@ await t('結果画像（1080x1350）が描けて保存できる', async () => {
   await dl.saveAs(ROOT + '/shots/05-card.png')
   expect(v.w === 1080 && v.h === 1350 && v.v > 500 && /elevator-keeper-\d+\.png/.test(dl.suggestedFilename()), { v, f: dl.suggestedFilename() }); return { ...v, file: dl.suggestedFilename() }
 })
+await t('Xでポスト: ボタンが見えて、押すと x.com/intent/post が開く（text に点・ランク・称号とハッシュタグ、url に公開URL）', async () => {
+  const r = await xPost(p)
+  expect(r.b.vis && !r.b.clip && r.b.label === 'Xでポスト' && r.url.startsWith('https://x.com/intent/post?') && r.text.includes('空気読み力' + r.api.score + '%') && r.text.includes(r.api.rank + 'ランク「' + r.api.title + '」') && r.text.endsWith('#エレベーター開閉係') && !r.text.includes('tom3games') && r.link === 'https://tom3games.github.io/elevator-keeper/' && r.text === r.api.text && r.link === r.api.url, r); return r.text
+})
 await t('もう一回ですぐ遊べる', async () => {
   await p.click('#bAgain'); await p.waitForFunction(() => ek.S.phase === 'play', null, { timeout: 6000 })
   const r = await p.evaluate(() => ({ t: ek.S.t, people: ek.S.log.people, bossOut: ek.S.log.bossOut })); expect(r.t < 2 && r.bossOut === 0, r)
@@ -250,6 +264,8 @@ await t('英語に切り替えると全部英語（タイトル・遊び方・�
   await p.evaluate(() => { ek.startGame(5); ek.dbg.pause(true); ek.S.phase = 'play'; document.querySelector('#count').hidden = true; ek.setBot('good', 2); ek.dbg.until(() => ek.S.phase === 'result', 60 * 120); ek.dbg.pause(false) })
   await p.waitForTimeout(3500); const c = await p.textContent('#vResult'); await p.screenshot({ path: ROOT + '/shots/08-result-en.png' })
   const jp = /[぀-ヿ一-龯]/
+  const x = await xPost(p)
+  expect(x.b.vis && !x.b.clip && x.b.label === 'Post on X' && x.url.startsWith('https://x.com/intent/post?') && x.text.includes('Room-reading ' + x.api.score + '%') && x.text.includes('"' + x.api.title + '"') && x.text.endsWith('#HoldTheDoorGame') && !jp.test(x.text) && x.link === 'https://tom3games.github.io/elevator-keeper/', x)
   expect(a[0] === 'HOLD THE' && a[2] === 'en' && !jp.test(b.replace(/開|閉/g, '')) && !jp.test(c), { a, b: b.slice(0, 80), c: c.slice(0, 120) })
   await p.click('#bLang')
 })
@@ -273,6 +289,9 @@ for (const [w, h, name] of SIZES) {
   await q.evaluate(() => { ek.setBot('normal', 4); ek.dbg.until(() => ek.S.phase === 'result', 60 * 120); ek.dbg.pause(false) })
   await q.waitForTimeout(3600)
   views.result = await fit(q); await q.screenshot({ path: `${ROOT}/shots/fit-${name}-4result.png` })
+  const clipJa = await clipped(q), xVis = await q.evaluate(() => !!document.querySelector('#bX').offsetParent)
+  await q.click('#bLang'); await q.waitForTimeout(300); views.resultEn = await fit(q); const clipEn = await clipped(q); await q.screenshot({ path: `${ROOT}/shots/fit-${name}-5result-en.png` }); await q.click('#bLang')
+  await t(`${name}: 結果のボタン（Xでポスト含む）の文字が切れない（日英）`, async () => { expect(!clipJa.length && !clipEn.length && xVis, { clipJa, clipEn, xVis }) })
   for (const [v, r] of Object.entries(views)) await t(`一画面に収まる ${name} ${w}x${h} ${v}`, async () => { expect(!r.over.length, r) })
   await t(`${name}: はみ出し・エラーなし`, async () => { const o = await overflow(q); expect(o.sw <= o.W && !o.bad.length && !q.errs.length, JSON.stringify(o) + q.errs.join('|')) })
   await q.close()
