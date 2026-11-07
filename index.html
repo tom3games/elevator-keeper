@@ -233,6 +233,8 @@ body.touch .key{display:none}
   .rFoot .btn{min-height:42px;font-size:14px;padding:0 8px}
   .rFoot .btn.red{min-height:48px;font-size:16px}
 }
+/* 支援ボタン（共通 support.js）: 低い縦長画面では英語が2行になりカードが切れるので、この画面だけ一回り小さく */
+@media (max-height:740px) and (orientation:portrait){#tmSupport{min-height:36px!important;margin-top:4px!important;padding:0 12px!important;font-size:13px!important}}
 </style>
 </head>
 <body>
@@ -352,6 +354,6 @@ body.touch .key{display:none}
 <script src="data.js?v=2"></script>
 <script src="snd.js?v=2"></script>
 <script type="module" src="game.js?v=2"></script>
-<script src="support.js?v=1" data-ja="缶コーヒー" data-en="a canned coffee"></script>
+<script src="support.js?v=2" data-ja="缶コーヒー" data-en="a canned coffee"></script>
 </body>
 </html>

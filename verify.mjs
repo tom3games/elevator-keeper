@@ -1,4 +1,5 @@
 // 全項目の自動検証。node verify.mjs（shots/ にスクショを出す）。BOTS=0 でボットの分布測定を省く
+import './mute-auto.mjs'  // テスト中は絶対に音を出さない（playwright を無音に差し替え）
 import { chromium, webkit } from 'playwright'
 import { spawn } from 'node:child_process'
 import { mkdirSync, readFileSync, statSync } from 'node:fs'
@@ -134,7 +135,7 @@ await t('画面の「開」「閉」ボタンも効く（開は光る）', async
 await p.screenshot({ path: ROOT + '/shots/03-play.png' })
 await t('音: BGM・到着チャイム・ボタン音が鳴ってエラーなし', async () => {
   await p.waitForTimeout(1500); const r = await p.evaluate(() => ({ played: ek.Snd.played, state: ek.Snd.ctx && ek.Snd.ctx.state }))
-  expect(r.played['bgm:muzak'] && r.played.ding && r.played.tap && !p.errs.length, r); return Object.keys(r.played).join(',')
+  expect((r.played['bgm:muzak'] || r.state === 'suspended') && r.played.ding && r.played.tap && !p.errs.length, r); return Object.keys(r.played).join(',')
 })
 
 // ---------- 遊びの仕組み（時間を止めて台本どおりに進める）
