@@ -90,7 +90,7 @@ await t('ブラウザの拡大が起きない（viewport・ピンチ・Ctrl+ホ�
 })
 await t('OGP 一式（og:image は公開URLの og.png?v=）と og.png が 1200x630', async () => {
   const r = await p.evaluate(() => Object.fromEntries(['og:title', 'og:description', 'og:image', 'og:url', 'og:type'].map(k => [k, document.querySelector(`meta[property="${k}"]`)?.content]).concat([['tw', document.querySelector('meta[name="twitter:card"]')?.content]])))
-  expect(Object.values(r).every(Boolean) && r['og:image'].startsWith('https://tom3games.github.io/elevator-keeper/og.png?v=') && r['og:url'] === 'https://tom3games.github.io/elevator-keeper/' && r.tw === 'summary_large_image', r)
+  expect(Object.values(r).every(Boolean) && r['og:image'].startsWith('https://tom3games.com/play/elevator-keeper/og.png?v=') && r['og:url'] === 'https://tom3games.com/play/elevator-keeper/' && r.tw === 'summary_large_image', r)
   const b = readFileSync(ROOT + '/og.png'); expect(b.readUInt32BE(16) === 1200 && b.readUInt32BE(20) === 630, 'og.png size')
 })
 await t('初回の読み込みが 3MB 以内', async () => {
