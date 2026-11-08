@@ -73,7 +73,7 @@ async function xPost(pg) {
   return { b, url, text: u.searchParams.get('text'), link: u.searchParams.get('url'), api }
 }
 const clipped = q => q.evaluate(() => [...document.querySelectorAll('.view:not([hidden]) button')].filter(b => b.offsetParent && b.scrollWidth > b.clientWidth + 1).map(b => b.id))
-const SIZES = [[360, 640, 'small'], [390, 844, 'phone'], [844, 390, 'land'], [667, 375, 'land-se'], [768, 1024, 'tab'], [1440, 900, 'pc']]
+const SIZES = [[360, 640, 'small'], [390, 844, 'phone'], [844, 390, 'land'], [667, 375, 'land-se'], [430, 932, 'max'], [768, 1024, 'tab'], [1440, 900, 'pc']]
 
 const browser = await chromium.launch(GPU)
 let p = await open(browser)

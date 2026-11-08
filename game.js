@@ -842,6 +842,7 @@ function fillResult(R, instant) {
   $('#rSub').innerHTML = `<div>${T('explode')}<b>${L.explode}</b></div><div>${T('buzz')}<b>${L.buzz}</b></div><div>${T('fooled')}<b>${L.fooled}</b></div>`
   $('#rComment').textContent = lang === 'ja' ? rk[4] : rk[5]
   const els = ['#rBoss', '#rLists', '#rSub', '#rMc']
+  fitResultCard()
   if (instant) { $('#rScore').textContent = R.score; $('#rRank').classList.add('on'); $('#rTitle').classList.add('on'); for (const e of els) $(e).classList.add('on'); return }
   for (const e of els) $(e).classList.remove('on'); $('#rRank').classList.remove('on'); $('#rTitle').classList.remove('on')
   $('#rScore').textContent = '0'
@@ -864,6 +865,14 @@ function fillResult(R, instant) {
   }
   fillResult.skip = () => { clearInterval(fillResult.iv); clearTimeout(fillResult.tm); fillResult(R, true); if (R.score >= 40) Snd.setTrack('result'); else Snd.setTrack('sad') }
 }
+
+// 結果カードが画面に収まるまで段階的に詰める（英語の長い称号・統計の折り返しで高さが変わるため実測する）
+function fitResultCard() {
+  const c = $('#rCard'); if (!c || $('#vResult').hidden) return
+  c.classList.remove('c1', 'c2', 'c3', 'c4')
+  for (const k of ['c1', 'c2', 'c3', 'c4']) { if (c.scrollHeight <= c.clientHeight + 1) break; c.classList.add(k) }
+}
+window.addEventListener('resize', () => fitResultCard())
 
 // ---------- 結果画像（1080x1350）
 function loadImg(src) { return new Promise(r => { if (!src) return r(null); const i = new Image(); i.onload = () => r(i); i.onerror = () => r(null); i.src = src }) }
