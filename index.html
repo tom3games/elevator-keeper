@@ -31,7 +31,7 @@ button{font-family:inherit;color:inherit;font-size:inherit}
 :focus-visible{outline:3px solid var(--brass);outline-offset:3px}
 #gl{position:fixed;inset:0;width:100%;height:100%;display:block;z-index:0}
 .view{position:fixed;inset:0;height:100svh;overflow:hidden;z-index:2;display:flex;flex-direction:column;align-items:center;
-  padding:max(58px,calc(env(safe-area-inset-top) + 52px)) 16px max(18px,calc(env(safe-area-inset-bottom) + 14px));gap:12px}
+  padding:max(58px,calc(env(safe-area-inset-top) + 52px)) 16px max(18px,calc(calc(env(safe-area-inset-bottom) + var(--inapp-bot,0px)) + 14px));gap:12px}
 .wrap{width:min(520px,100%);display:flex;flex-direction:column;align-items:center;gap:clamp(8px,1.6vh,14px);min-height:0;max-height:100%}
 .view:not([hidden]) .wrap{animation:enter .35s cubic-bezier(.2,.8,.2,1) both}
 @keyframes enter{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
@@ -74,7 +74,7 @@ button{font-family:inherit;color:inherit;font-size:inherit}
 .bubble::before{content:"";position:absolute;left:-8px;top:18px;border:8px solid transparent;border-right-color:var(--cream);border-left:0}
 
 @media (max-height:560px) and (min-aspect-ratio:1/1){
-  #vTitle{padding-top:max(10px,env(safe-area-inset-top));padding-bottom:max(10px,env(safe-area-inset-bottom))}
+  #vTitle{padding-top:max(10px,env(safe-area-inset-top));padding-bottom:max(10px,calc(env(safe-area-inset-bottom) + var(--inapp-bot,0px)))}
   #vTitle .wrap{width:min(640px,100%)}
   .logo{margin-top:0}.logo .l1{font-size:26px}.logo .l2{font-size:min(15vh,64px)}.logo .sub{margin-top:8px}
   #vTitle .mcLine{display:none}
@@ -129,7 +129,7 @@ button{font-family:inherit;color:inherit;font-size:inherit}
 #irrBar{flex:1;height:12px;border-radius:6px;background:rgba(255,255,255,.15);overflow:hidden}
 #irrBar i{display:block;height:100%;width:0;background:linear-gradient(90deg,#7ad37a,#f5c84c 50%,#ff4a4a);background-size:300px 100%;transition:width .15s}
 #irrFace{width:26px;height:26px;flex:none}
-#ctl{position:absolute;left:0;right:0;bottom:max(14px,calc(env(safe-area-inset-bottom) + 10px));display:flex;justify-content:center;gap:clamp(22px,8vw,60px)}
+#ctl{position:absolute;left:0;right:0;bottom:max(14px,calc(calc(env(safe-area-inset-bottom) + var(--inapp-bot,0px)) + 10px));display:flex;justify-content:center;gap:clamp(22px,8vw,60px)}
 .eb{width:clamp(96px,28vw,128px);height:clamp(96px,28vw,128px);border-radius:50%;border:0;cursor:pointer;position:relative;
   background:radial-gradient(circle at 50% 50%,#f6f7fa 0 52%,#c9ced8 53% 60%,#8d93a3 61% 100%);box-shadow:0 6px 0 #4b4f5c,0 12px 22px rgba(0,0,0,.45),inset 0 2px 0 rgba(255,255,255,.7);
   display:flex;flex-direction:column;align-items:center;justify-content:center;gap:0;color:var(--navy);transition:transform .06s,box-shadow .06s}
@@ -161,7 +161,7 @@ body.touch .key{display:none}
 #count .m{font-weight:900;font-size:clamp(16px,5vw,24px);text-shadow:0 2px 8px #000}
 #flash{position:absolute;inset:0;background:#ff2a2a;opacity:0;pointer-events:none;transition:opacity .4s}
 @media (max-height:560px) and (min-aspect-ratio:1/1){
-  #ctl{left:max(14px,env(safe-area-inset-left));right:max(14px,env(safe-area-inset-right));justify-content:space-between;bottom:max(12px,env(safe-area-inset-bottom))}
+  #ctl{left:max(14px,env(safe-area-inset-left));right:max(14px,env(safe-area-inset-right));justify-content:space-between;bottom:max(12px,calc(env(safe-area-inset-bottom) + var(--inapp-bot,0px)))}
   .eb{width:clamp(82px,22vh,110px);height:clamp(82px,22vh,110px)}
   .chip{height:34px}
   .chip b{font-size:18px}
@@ -219,7 +219,7 @@ body.touch .key{display:none}
 .rCard.c3 .rHead{display:none}
 .rCard.c4 .subStats{display:none}
 @media (max-height:560px) and (min-aspect-ratio:1/1){
-  #vResult{padding-top:max(8px,env(safe-area-inset-top));padding-bottom:max(8px,env(safe-area-inset-bottom))}
+  #vResult{padding-top:max(8px,env(safe-area-inset-top));padding-bottom:max(8px,calc(env(safe-area-inset-bottom) + var(--inapp-bot,0px)))}
   #vResult .wrap{width:min(860px,100%);flex-direction:row;align-items:stretch}
   .rCard{flex:1;display:grid;grid-template-columns:150px 1fr;grid-template-rows:auto auto auto 1fr;column-gap:10px;row-gap:5px;padding:8px 10px}
   .rHead{grid-column:1/3}
@@ -361,6 +361,6 @@ body.touch .key{display:none}
 <script src="data.js?v=2"></script>
 <script src="snd.js?v=2"></script>
 <script type="module" src="game.js?v=3"></script>
-<script src="support.js?v=4" data-ja="缶コーヒー" data-en="a canned coffee"></script>
+<script src="support.js?v=5" data-ja="缶コーヒー" data-en="a canned coffee"></script>
 </body>
 </html>
